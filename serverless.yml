@@ -13,6 +13,8 @@ provider:
   runtime: nodejs6.10
   region: eu-west-1
   stage: prod
+  # you can use an existing IAM role, or create a statement
+  # role: arn:aws:iam::123456789:role/ROLENAME
   iamRoleStatements:
     - Effect: "Allow"
       Action:

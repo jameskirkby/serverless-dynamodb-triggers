@@ -8,8 +8,8 @@ const dynamodb = new AWS.DynamoDB()
 
 module.exports = (event, context, callback) => {
 
-  // also force the ttl to be a string, even though it's saved as a number
   // the TTL is used to define when to automatically delete the data from the database
+  // (this has to be enabled in DynamoDB)
   // so it's set to now, plus 3 days
   const ttl = (parseInt(new Date().getTime() / 1000) + (86400 * 3)).toString()
 
@@ -39,9 +39,9 @@ module.exports = (event, context, callback) => {
 
     }
 
-    console.log('Order saved to database');
+    console.log('Order saved to database')
 
-    // this will be the response shown to Shopify
+    // this will be the response
     return callback(null, {
       statusCode: 200,
       headers: {
