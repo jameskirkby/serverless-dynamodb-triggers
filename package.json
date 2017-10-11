@@ -1,0 +1,12 @@
+{
+  "name": "serverless-dynamodb-triggers",
+  "version": "1.0.0",
+  "description": "Serverless DynamoDB Trigger Example",
+  "main": "handler.js",
+  "author": "James Kirkby <james@breaksagency.com>",
+  "license": "ISC",
+  "dependencies": {
+    "aws-sdk": "^2.124.0",
+    "uuid": "^3.1.0"
+  }
+}

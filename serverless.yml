@@ -1,0 +1,62 @@
+# Welcome to serverless. Read the docs
+# https://serverless.com/framework/docs/
+
+# Serverless.yml is the configuration the CLI
+# uses to deploy your code to your provider of choice
+
+# The `service` block is the name of the service
+service: serverless-dynamodb-triggers
+
+# The `provider` block defines where your service will be deployed
+provider:
+  name: aws
+  runtime: nodejs6.10
+  region: eu-west-1
+  stage: prod
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:Scan
+      # Login to AWS, go to DynamoDB, create a table
+      # In Table Details, the Resource is listed under "Amazon Resource Name (ARN)"
+      Resource: "arn:aws:dynamodb:eu-west-1:123456789:table/TABLENAME"
+    - Effect: "Allow"
+      Action:
+        - dynamodb:DescribeStream
+        - dynamodb:GetRecords
+        - dynamodb:GetShardIterator
+        - dynamodb:ListStreams
+      # Enable streams for the table
+      # The Resource should be the full "Latest stream ARN" value
+      Resource: "arn:aws:dynamodb:eu-west-1:123456789:table/TABLENAME/stream/2017-10-11T09:32:34.385"
+
+# The `functions` block defines what code to deploy
+functions:
+  receiveOrder:
+    description: Save orders to a database
+    handler: handler.receiveOrder
+    events:
+      - http:
+          path: receiveOrder
+          method: post
+          cors: true
+    environment:
+      # this should be the table name
+      tableName: TABLENAME
+
+  processOrder:
+    description: Process orders
+    handler: handler.processOrder
+    events:
+      # this should be the same value as in iamRoleStatements
+      - stream: "arn:aws:dynamodb:eu-west-1:123456789:table/TABLENAME/stream/2017-10-11T09:32:34.385"
+    environment:
+      # this should be the table name
+      tableName: TABLENAME
+
+package:
+  include:
+    - node_modules/**
+    - events/**
