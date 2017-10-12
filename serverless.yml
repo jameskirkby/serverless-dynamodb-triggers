@@ -7,13 +7,23 @@
 # The `service` block is the name of the service
 service: serverless-dynamodb-triggers
 
+
 # The `provider` block defines where your service will be deployed
 provider:
   name: aws
   runtime: nodejs6.10
   region: eu-west-1
   stage: prod
-  # you can use an existing IAM role, or create a statement
+  environment:
+    # Login to AWS, go to DynamoDB, create a table
+    # In Table Details, the Resource is listed under "Amazon Resource Name (ARN)"
+    DYNAMODB_TABLE: "arn:aws:dynamodb:eu-west-1:123456789:table/TABLENAME"
+    # Enable streams for the table
+    # The Resource should be the full "Latest stream ARN" value
+    DYNAMODB_STREAM: "arn:aws:dynamodb:eu-west-1:123456789:table/TABLENAME/stream/2017-10-11T09:32:34.385"
+  # you can use an either existing IAM role, or create a statement. But not both
+  # In this example, we're using `iamRoleStatements`, which is why `role` is commented out
+  # If you want to use `role`, comment out all of the `iamRoleStatements` rules
   # role: arn:aws:iam::123456789:role/ROLENAME
   iamRoleStatements:
     - Effect: "Allow"
@@ -21,18 +31,15 @@ provider:
         - dynamodb:PutItem
         - dynamodb:UpdateItem
         - dynamodb:Scan
-      # Login to AWS, go to DynamoDB, create a table
-      # In Table Details, the Resource is listed under "Amazon Resource Name (ARN)"
-      Resource: "arn:aws:dynamodb:eu-west-1:123456789:table/TABLENAME"
+      Resource: ${self:provider.environment.DYNAMODB_TABLE}
     - Effect: "Allow"
       Action:
         - dynamodb:DescribeStream
         - dynamodb:GetRecords
         - dynamodb:GetShardIterator
         - dynamodb:ListStreams
-      # Enable streams for the table
-      # The Resource should be the full "Latest stream ARN" value
-      Resource: "arn:aws:dynamodb:eu-west-1:123456789:table/TABLENAME/stream/2017-10-11T09:32:34.385"
+      Resource: ${self:provider.environment.DYNAMODB_STREAM}
+
 
 # The `functions` block defines what code to deploy
 functions:
@@ -44,19 +51,13 @@ functions:
           path: receiveOrder
           method: post
           cors: true
-    environment:
-      # this should be the table name
-      tableName: TABLENAME
 
   processOrder:
     description: Process orders
     handler: handler.processOrder
     events:
-      # this should be the same value as in iamRoleStatements
-      - stream: "arn:aws:dynamodb:eu-west-1:123456789:table/TABLENAME/stream/2017-10-11T09:32:34.385"
-    environment:
-      # this should be the table name
-      tableName: TABLENAME
+      - stream: ${self:provider.environment.DYNAMODB_STREAM}
+
 
 package:
   include:

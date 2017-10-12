@@ -15,7 +15,7 @@ module.exports = (event, context, callback) => {
 
   // setup the data to be sent to the database
   const params = {
-    TableName: process.env.tableName,
+    TableName: process.env.DYNAMODB_TABLE,
     Item: {
       ID: {
         S: uuid(),
