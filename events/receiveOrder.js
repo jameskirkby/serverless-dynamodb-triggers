@@ -8,6 +8,7 @@ const dynamodb = new AWS.DynamoDB()
 
 module.exports = (event, context, callback) => {
 
+  // Optional
   // the TTL is used to define when to automatically delete the data from the database
   // (this has to be enabled in DynamoDB)
   // so it's set to now, plus 3 days
